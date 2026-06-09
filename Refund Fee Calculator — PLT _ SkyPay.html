@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<!-- saved from url=(0062)file:///Users/steveshin/Downloads/refund_fee_calculator_4.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund Fee Calculator — PLT / SkyPay</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface-2: #f0efe9;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --text: #1a1a18;
+    --text-2: #5a5a55;
+    --text-3: #9a9a92;
+    --accent: #1a3a5c;
+    --accent-light: #e8eef5;
+    --green: #1a6640;
+    --green-bg: #e8f4ee;
+    --amber: #7a4a00;
+    --amber-bg: #fdf3e0;
+    --blue: #0f3d6e;
+    --blue-bg: #e6eef8;
+    --red: #c0392b;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #18181a;
+      --surface: #232326;
+      --surface-2: #2c2c30;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.14);
+      --text: #f0efe9;
+      --text-2: #a0a09a;
+      --text-3: #666660;
+      --accent: #4a8cc4;
+      --accent-light: #1a2a3a;
+      --green: #4caf7a;
+      --green-bg: #0d2a1a;
+      --amber: #e6a020;
+      --amber-bg: #2a1e08;
+      --blue: #6aaee0;
+      --blue-bg: #0d1e30;
+      --red: #e05a4a;
+    }
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 2rem 2rem 1.75rem;
+  }
+
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.25rem;
+  }
+
+  header p {
+    font-size: 0.8125rem;
+    opacity: 0.65;
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .section { margin-bottom: 2rem; }
+
+  .section-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Country tabs */
+  .country-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .ctab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-2);
+    font-size: 0.875rem;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+
+  .ctab:hover { background: var(--surface-2); }
+
+  .ctab.active {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .ctab .rate {
+    font-size: 0.75rem;
+    background: var(--surface-2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
+  .ctab.active .rate {
+    background: var(--accent-light);
+    color: var(--accent);
+    opacity: 0.8;
+  }
+
+  /* Sliders */
+  .slider-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem 2rem;
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 520px) {
+    .slider-grid { grid-template-columns: 1fr; }
+  }
+
+  .slider-block label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.8125rem;
+    color: var(--text-2);
+    margin-bottom: 6px;
+  }
+
+  .slider-block label span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--border-strong);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--accent);
+    cursor: pointer;
+  }
+
+  input[type=range]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--surface);
+    cursor: pointer;
+  }
+
+  /* Metric cards */
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 0.875rem 1rem;
+  }
+
+  .metric-label { font-size: 0.75rem; color: var(--text-3); margin-bottom: 4px; }
+  .metric-value { font-size: 1.25rem; font-weight: 600; color: var(--text); }
+  .metric-sub { font-size: 0.6875rem; color: var(--text-3); margin-top: 2px; }
+
+  /* Cost card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.8125rem;
+    padding: 4px 0;
+    color: var(--text-2);
+    gap: 12px;
+  }
+
+  .row .label { flex: 1; }
+  .row .val { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  .row.sub { padding-left: 14px; font-size: 0.75rem; color: var(--text-3); }
+
+  .row.subtotal {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 6px;
+  }
+
+  .row.total {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+    margin-top: 8px;
+  }
+
+  .gap { height: 14px; }
+
+  .red { color: var(--red); }
+  .green-text { color: var(--green); }
+
+  /* Fee tier cards */
+  .tier {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tier.rec {
+    border-color: var(--green);
+    background: var(--green-bg);
+  }
+
+  .tier-left { flex: 1; }
+
+  .tier-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .tier-desc { font-size: 0.75rem; color: var(--text-3); }
+
+  .tier-amount {
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .tier.rec .tier-amount { color: var(--green); }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    padding: 1px 7px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .badge-floor { background: var(--blue-bg); color: var(--blue); }
+  .badge-rec   { background: var(--green-bg); color: var(--green); }
+  .badge-agg   { background: var(--amber-bg); color: var(--amber); }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.75rem 0;
+  }
+
+  footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-3);
+    padding: 2rem 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Refund fee calculator</h1>
+</header>
+
+<div class="container">
+
+  <div class="section">
+    <p class="section-label">Country &amp; Stripe rate</p>
+    <div class="country-tabs">
+      <button class="ctab active" data-rate="1.3" data-currency="AUD" data-sym="A$" onclick="setCountry(this)">🇦🇺 Australia <span class="rate">1.3%</span></button>
+      <button class="ctab" data-rate="2.35" data-currency="USD" data-sym="US$" onclick="setCountry(this)">🇺🇸 United States <span class="rate">2.35%</span></button>
+      <button class="ctab" data-rate="1.63" data-currency="GBP" data-sym="£" onclick="setCountry(this)">🇬🇧 United Kingdom <span class="rate">1.63%</span></button>
+      <button class="ctab" data-rate="3.0" data-currency="CAD" data-sym="CA$" onclick="setCountry(this)">🇨🇦 Canada <span class="rate">3.0%</span></button>
+    </div>
+  </div>
+
+  <div class="section">
+    <p class="section-label">Booking assumptions</p>
+    <div class="slider-grid">
+      <div class="slider-block">
+        <label>TTV <span id="ttv-out">A$2,000</span></label>
+        <input type="range" min="500" max="5000" value="2000" step="100" id="ttv">
+      </div>
+      <div class="slider-block">
+        <label>Deposit <span id="dep-out">20%</span></label>
+        <input type="range" min="5" max="30" value="20" step="1" id="dep">
+      </div>
+      <div class="slider-block">
+        <label>Markup <span id="mkp-out">17%</span></label>
+        <input type="range" min="5" max="30" value="17" step="1" id="mkp">
+      </div>
+      <div class="slider-block">
+        <label>Repayment term <span id="maxwk-out">14 wks</span></label>
+        <input type="range" min="4" max="17" value="14" step="1" id="maxwk">
+      </div>
+      <div class="slider-block">
+        <label>Cancelled at week <span id="wk-out">week 4</span></label>
+        <input type="range" min="0" max="14" value="4" step="1" id="wk">
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <div id="output">
+    <div class="section">
+      <p class="section-label">Booking snapshot</p>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="metric-label">Gross margin</div>
+          <div class="metric-value">A$290.60</div>
+          <div class="metric-sub">100% foregone on full refund</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Deposit paid</div>
+          <div class="metric-value">A$400</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Instalments collected</div>
+          <div class="metric-value">4</div>
+          <div class="metric-sub">× A$114 = A$457</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Net refund to customer</div>
+          <div class="metric-value">A$707</div>
+          <div class="metric-sub">A$857 − A$150 airline fee</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Cost breakdown</p>
+      <div class="card">
+        <div class="row"><span class="label">Processing — deposit received (A$400 × 1.3%)</span><span class="val"><span class="red">−A$5.20</span></span></div>
+        <div class="row"><span class="label">Processing — 4 instalments (A$114 × 1.3% × 4)</span><span class="val"><span class="red">−A$5.94</span></span></div>
+        <div class="row"><span class="label">Airline refund processing fee (deducted from refund)</span><span class="val"><span class="red">−A$150.00</span></span></div>
+        <div class="row"><span class="label">Processing — refund out (A$707 net × 1.3%)</span><span class="val"><span class="red">−A$9.19</span></span></div>
+        <div class="row subtotal"><span class="label">Total processing costs</span><span class="val"><span class="red">−A$20.34</span></span></div>
+        <div class="gap"></div>
+        <div class="row"><span class="label">Funding cost (4 wks × 0.308%/wk on A$1309 deployed)</span><span class="val"><span class="red">−A$16.12</span></span></div>
+        <div class="row"><span class="label">Admin / refund handling</span><span class="val"><span class="red">−A$30.00</span></span></div>
+        <div class="gap"></div>
+        <div class="row"><span class="label">Gross margin foregone (full refund — 100%)</span><span class="val"><span class="red">−A$290.60</span></span></div>
+        <div class="row total"><span class="label">Total cost to PLT</span><span class="val red">−A$357.05</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Fee to charge customer</p>
+
+      <div class="tier">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-floor">Floor</span> Hard costs only</div>
+          <div class="tier-desc">Processing A$20 + funding A$16 + admin A$30 — does not recover lost margin</div>
+        </div>
+        <div class="tier-amount">A$66</div>
+      </div>
+
+      <div class="tier rec">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-rec">Recommended</span> Hard costs + 30% margin recovery</div>
+          <div class="tier-desc">Floor + 30% of A$291 foregone margin (+A$87)</div>
+        </div>
+        <div class="tier-amount">A$154</div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-agg">Aggressive</span> Hard costs + full margin recovery</div>
+          <div class="tier-desc">Floor + 100% of A$291 foregone margin (+A$291)</div>
+        </div>
+        <div class="tier-amount">A$357</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  PLT / SkyPay internal use · Generated June 2026
+</footer>
+
+<script>
+let stripePct = 0.013;
+let sym = 'A$';
+
+function setCountry(el) {
+  document.querySelectorAll('.ctab').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  stripePct = parseFloat(el.dataset.rate) / 100;
+  sym = el.dataset.sym;
+  calc();
+}
+
+function c(n)  { return '<span class="red">−' + sym + n.toFixed(2) + '</span>'; }
+function cv(n) { return '<span class="red">−' + sym + n.toFixed(2) + '</span>'; }
+
+function calc() {
+  const ttv     = +document.getElementById('ttv').value;
+  const depPct  = +document.getElementById('dep').value / 100;
+  const mkp     = +document.getElementById('mkp').value / 100;
+  const maxWk   = +document.getElementById('maxwk').value;
+  const wk      = Math.min(+document.getElementById('wk').value, maxWk);
+
+  document.getElementById('ttv-out').textContent    = sym + ttv.toLocaleString();
+  document.getElementById('dep-out').textContent    = Math.round(depPct * 100) + '%';
+  document.getElementById('mkp-out').textContent    = Math.round(mkp * 100) + '%';
+  document.getElementById('maxwk-out').textContent  = maxWk + ' wks';
+  document.getElementById('wk-out').textContent     = 'week ' + wk;
+  document.getElementById('wk').max = maxWk;
+
+  const wholesale      = ttv / (1 + mkp);
+  const grossMargin    = ttv - wholesale;
+  const deposit        = ttv * depPct;
+  const instalmentAmt  = (ttv - deposit) / maxWk;
+  const instCollected  = wk;
+  const totalCollected = deposit + instalmentAmt * instCollected;
+
+  const airlineFee      = 150;
+  const netRefund       = Math.max(0, totalCollected - airlineFee);
+
+  const procDeposit     = deposit * stripePct;
+  const procInstalments = instalmentAmt * instCollected * stripePct;
+  const procRefund      = netRefund * stripePct;
+  const totalProc       = procDeposit + procInstalments + procRefund;
+
+  const capitalDeployed = wholesale - deposit;
+  const weeklyRate      = 0.16 / 52;
+  const fundingCost     = Math.max(0, capitalDeployed * weeklyRate * wk);
+  const adminCost       = 30;
+
+  const marginForegone = grossMargin;
+
+  const minFee = totalProc + fundingCost + adminCost;
+  const recFee = minFee + marginForegone * 0.3;
+  const maxFee = minFee + marginForegone;
+
+  document.getElementById('output').innerHTML = `
+    <div class="section">
+      <p class="section-label">Booking snapshot</p>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="metric-label">Gross margin</div>
+          <div class="metric-value">${sym}${grossMargin.toFixed(2)}</div>
+          <div class="metric-sub">100% foregone on full refund</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Deposit paid</div>
+          <div class="metric-value">${sym}${deposit.toFixed(0)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Instalments collected</div>
+          <div class="metric-value">${instCollected}</div>
+          <div class="metric-sub">× ${sym}${instalmentAmt.toFixed(0)} = ${sym}${(instalmentAmt * instCollected).toFixed(0)}</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Net refund to customer</div>
+          <div class="metric-value">${sym}${netRefund.toFixed(0)}</div>
+          <div class="metric-sub">${sym}${totalCollected.toFixed(0)} − ${sym}150 airline fee</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Cost breakdown</p>
+      <div class="card">
+        <div class="row"><span class="label">Processing — deposit received (${sym}${deposit.toFixed(0)} × ${(stripePct*100).toFixed(1)}%)</span><span class="val">${c(procDeposit)}</span></div>
+        <div class="row"><span class="label">Processing — ${instCollected} instalments (${sym}${instalmentAmt.toFixed(0)} × ${(stripePct*100).toFixed(1)}% × ${instCollected})</span><span class="val">${c(procInstalments)}</span></div>
+        <div class="row"><span class="label">Airline refund processing fee (deducted from refund)</span><span class="val">${c(airlineFee)}</span></div>
+        <div class="row"><span class="label">Processing — refund out (${sym}${netRefund.toFixed(0)} net × ${(stripePct*100).toFixed(1)}%)</span><span class="val">${c(procRefund)}</span></div>
+        <div class="row subtotal"><span class="label">Total processing costs</span><span class="val">${c(totalProc)}</span></div>
+        <div class="gap"></div>
+        <div class="row"><span class="label">Funding cost (${wk} wks × ${(weeklyRate*100).toFixed(3)}%/wk on ${sym}${capitalDeployed.toFixed(0)} deployed)</span><span class="val">${c(fundingCost)}</span></div>
+        <div class="row"><span class="label">Admin / refund handling</span><span class="val">${c(adminCost)}</span></div>
+        <div class="gap"></div>
+        <div class="row"><span class="label">Gross margin foregone (full refund — 100%)</span><span class="val">${c(marginForegone)}</span></div>
+        <div class="row total"><span class="label">Total cost to PLT</span><span class="val red">−${sym}${(totalProc + fundingCost + adminCost + marginForegone).toFixed(2)}</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="section-label">Fee to charge customer</p>
+
+      <div class="tier">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-floor">Floor</span> Hard costs only</div>
+          <div class="tier-desc">Processing ${sym}${totalProc.toFixed(0)} + funding ${sym}${fundingCost.toFixed(0)} + admin ${sym}${adminCost} — does not recover lost margin</div>
+        </div>
+        <div class="tier-amount">${sym}${Math.round(minFee)}</div>
+      </div>
+
+      <div class="tier rec">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-rec">Recommended</span> Hard costs + 30% margin recovery</div>
+          <div class="tier-desc">Floor + 30% of ${sym}${marginForegone.toFixed(0)} foregone margin (+${sym}${(marginForegone * 0.3).toFixed(0)})</div>
+        </div>
+        <div class="tier-amount">${sym}${Math.round(recFee)}</div>
+      </div>
+
+      <div class="tier">
+        <div class="tier-left">
+          <div class="tier-name"><span class="badge badge-agg">Aggressive</span> Hard costs + full margin recovery</div>
+          <div class="tier-desc">Floor + 100% of ${sym}${marginForegone.toFixed(0)} foregone margin (+${sym}${marginForegone.toFixed(0)})</div>
+        </div>
+        <div class="tier-amount">${sym}${Math.round(maxFee)}</div>
+      </div>
+    </div>
+  `;
+}
+
+['ttv','dep','mkp','maxwk','wk'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calc);
+});
+calc();
+</script>
+
+
+</body></html>
